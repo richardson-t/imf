@@ -3,7 +3,8 @@ from astropy import units as u
 from scipy.interpolate import PchipInterpolator
 from scipy.optimize import root_scalar
 
-from imf.imf import get_massfunc, Schechter
+import imf
+from imf.imf import get_massfunc
 
 expectedmass_cache = {}
 
@@ -269,23 +270,49 @@ def make_star_cluster(mtotal=None,
     "return conversion" also returns the information used to 
     obtain the stellar masses
     """
+    assert ~np.logical_and(mtotal is None, nstars is None), 'please provide either a total mass in stars or a number of stars'
+    
     return 0
 
-def make_igimf(N_clusters,
+def make_igimf(mtotal=None,
+               nclusters=None,
                mclust_min=None,
                mclust_max=None,
-               mtaper=None,
+               m_taper=None,
                imf='kroupa',
                sampling='random',
                stop_criterion='nearest',
                mstar_min=None,
-               mstar_max=None,
-               **kwargs):
+               mstar_max=None):
     """
     -sample some number of clusters from a Schechter function
-    -run star sampler on mass of each cluster (optionally; allow stellar IMFs)
+    -run star system sampler on mass of each cluster (optionally; allow stellar IMFs)
     """
-    return 0
+    assert ~np.logical_and(mtotal is None, nclusters is None), 'please provide either a total mass in clusters or a number of clusters'
+    
+    mmin = 1e2 if mclust_min is None else mclust_min
+    mmax = 1e6 if mclust_max is None else mclust_max
+    m0 = 8.5e3 if m_taper is None else m_taper
+    
+    cluster_mf = imf.Schechter(mmin=mmin, mmax=mmax,
+                               alpha=2, m0=m0)
+    if mtotal is None:
+        clusters = sample_number(nclusters, massfunc=cluster_mf,
+                                 silent=True)
+        print(f'Total mass in clusters is {np.round(sum(clusters), 1)}.') 
+    else:
+        clusters = sample_mass_function(mtotal, massfunc=cluster_mf,
+                                        silent=True)
+        print(f'Sampled {len(clusters)} clusters.')
+        
+    igimf = np.array([])
+    for cl in clusters:
+        cl_imf = make_star_cluster(mtotal=cl, massfunc=imf, sampling=sampling,
+                                   stop_criterion=stop_criterion,
+                                   mmin=mstar_min, mmax=mstar_max)
+        igimf = np.append(igimf, cl_imf)
+        
+    return igimf
 
 ### functions facilitating optimal sampling ###
 
