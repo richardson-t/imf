@@ -237,8 +237,8 @@ def _ratios(mults):
         
     return mass_ratios
 
-def _syst_to_stellar(syst_masses,
-                     return_props=True):
+def convert_syst_to_stellar(syst_masses,
+                            return_props=True):
     #convert a cluster of systems to a cluster of stars
     mults = _multiplicity(syst_masses)
     ratios = _ratios(mults)
@@ -271,8 +271,18 @@ def make_star_cluster(mtotal=None,
     obtain the stellar masses
     """
     assert ~np.logical_and(mtotal is None, nstars is None), 'please provide either a total mass in stars or a number of stars'
-    
-    return 0
+
+    if mtotal is None:
+        cl = sample_number(nstars, **kwargs)
+    else:
+        cl = sample_mass_function(mtotal, **kwargs)
+
+    if return_stellar & return_conversion:
+        star_cl, mults, ratios = convert_syst_to_stellar(cl)
+    elif return_stellar:
+        star_cl = convert_syst_to_stellar(cl,return_props=False)
+    else:
+        return cl
 
 def make_igimf(mtotal=None,
                nclusters=None,
