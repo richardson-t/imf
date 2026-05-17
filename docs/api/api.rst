@@ -7,7 +7,7 @@ These pages provide an overview of the accessible classes and functions in each 
    :maxdepth: 1
 
    imf.rst
-   make_cluster.rst
+   sampling.rst
    lum.rst
    visualization.rst
    cmf.rst
