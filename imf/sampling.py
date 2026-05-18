@@ -265,6 +265,7 @@ def _ratios(mults):
     return mass_ratios
 
 def convert_syst_to_stellar(syst_masses,
+                            preserve_structure=True,
                             return_props=True):
     """
     Convert a collection of system masses to star systems, i.e.
@@ -275,24 +276,27 @@ def convert_syst_to_stellar(syst_masses,
     Parameters
     ----------
     syst_masses: array
+    preserve_structure: bool
+        If ``True``, explicitly keeps single stars as members of 
+        a system (default = ``True``)
     return_props: bool
         If ``True``, preserves the system structure and returns 
-        the multiplicity and mass ratios of each system
+        the multiplicity and mass ratios of each system 
+        (default = ``True``)
 
     Returns
     -------
     star_masses: list/array
-        If ``return_props`` is ``True``, returns a list of lists 
-        containing the masses of stars within each system. If 
-        ``return_props`` is ``False``, return an array of stellar
-        masses.
+        If `preserve_structure`` is ``True``, returns a list of lists 
+        containing the masses of stars within each system. Otherwise,
+        return an array of stellar masses
     mults: array, optional
         Multiplicities assigned to each system. Based on the
         statistics of `Offner et al. (2023) <10.48550/arXiv.2203.10066>`_
     ratios: list, optional
         Mass ratios of the members of each system relative to the
         primary mass. The first entry is the primary mass and will
-        therefore always be 1.
+        therefore always be 1
     """
     mults = _multiplicity(syst_masses)
     ratios = _ratios(mults)
@@ -303,41 +307,48 @@ def convert_syst_to_stellar(syst_masses,
         masses = [m_prim * r for r in ratios[ii]]
         star_masses.append(masses)
 
+    if ~preserve_masses:
+        star_masses = np.concatenate(star_masses)
+        
     if return_props:
         return star_masses, mults, ratios
     else:
-        return np.concatenate(star_masses)
+        return star_masses
     
 def make_star_cluster(mtotal=None,
                       ntotal=None,
                       return_stellar=False,
+                      preserve_structure=True,
                       return_conversion=False,
                       **kwargs):
     """
     Make a cluster of stars using either a total mass or
-    number of star systems. Includes three optional outputs
-    permitting access to the stellar mass function in
-    addition to the system mass function. Keyword arguments 
-    are passed to ``sample_mass`` or  ``sample_number``, 
-    depending on whether a mass budget or number of star 
-    systems is provided.
+    number of star systems. Permits access to the stellar
+    mass function in place of the system mass function and
+    provides two optional outputs detailing the mapping from
+    system to stellar. Keyword arguments are passed to ``sample_mass`` 
+    or ``sample_number`` depending on whether a mass budget or 
+    number of star systems is provided.
 
     Parameters
     ----------
     mtotal: float
         Total mass budget. Either ``mtotal`` or ``ntotal``
-        must be provided (default = None)
+        must be provided (default = ``None``)
     ntotal: int
         Total number of star systems to draw. Either ``ntotal``
-        or ``mtotal`` must be provided (default = None)
+        or ``mtotal`` must be provided (default = ``None``)
     return_stellar: bool, optional
-        Also return the stellar masses. Provides one additional
-        output; see ``convert_syst_to_stellar`` for details 
-        (default = False)
+        Return stellar masses instead of system masses
+        (default = ``False``)
+    preserve_structure: bool, optional
+        If returning stellar masses, retain their association
+        in multiple systems; see ``convert_syst_to_stellar``
+        for details (default = ``True``)
     return_conversion: bool, optional
-        Also return the information used to obtain the stellar masses.
-        Provides two additional outputs; see ``convert_syst_to_stellar`` 
-        for details (default = False)
+        If returning stellar masses, also return the information
+        used to obtain them. Provides two additional outputs; see 
+        ``convert_syst_to_stellar`` for details (default = ``False``)
     """
     assert ~np.logical_and(mtotal is None, nstars is None), 'please provide either a total mass in stars or a number of stars'
 
@@ -346,15 +357,15 @@ def make_star_cluster(mtotal=None,
     else:
         cl = sample_mass(mtotal, **kwargs)
 
-    if return_conversion:
-        star_cl, mults, ratios = convert_syst_to_stellar(cl)
-        if return_stellar:
-            return cl, star_cl, mults, ratios
+    if return_stellar:
+        if return_conversion:
+            star_cl, mults, ratios = convert_syst_to_stellar(cl,
+                                                             preserve_structure=preserve_structure)
+            return star_cl, mults, ratios
         else:
-            return cl, mults, ratios
-    elif return_stellar:
-        star_cl = convert_syst_to_stellar(cl,return_props=False)
-        return cl, star_cl
+            star_cl = convert_syst_to_stellar(cl,
+                                              preserve_structure=preserve_structure)
+            return star_cl
     else:
         return cl
 
