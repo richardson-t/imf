@@ -6,6 +6,8 @@ from scipy.optimize import root_scalar
 import imf
 from imf.imf import get_massfunc
 
+from tqdm import tqdm
+
 expectedmass_cache = {}
 
 def sample_mass(mtotal,
@@ -307,7 +309,7 @@ def convert_syst_to_stellar(syst_masses,
         masses = [m_prim * r for r in ratios[ii]]
         star_masses.append(masses)
 
-    if ~preserve_masses:
+    if not preserve_structure:
         star_masses = np.concatenate(star_masses)
         
     if return_props:
@@ -316,7 +318,7 @@ def convert_syst_to_stellar(syst_masses,
         return star_masses
     
 def make_star_cluster(mtotal=None,
-                      ntotal=None,
+                      nstars=None,
                       return_stellar=False,
                       preserve_structure=True,
                       return_conversion=False,
@@ -333,10 +335,10 @@ def make_star_cluster(mtotal=None,
     Parameters
     ----------
     mtotal: float
-        Total mass budget. Either ``mtotal`` or ``ntotal``
+        Total mass budget. Either ``mtotal`` or ``nstars``
         must be provided (default = ``None``)
-    ntotal: int
-        Total number of star systems to draw. Either ``ntotal``
+    nstars: int
+        Total number of star systems to draw. Either ``nstars``
         or ``mtotal`` must be provided (default = ``None``)
     return_stellar: bool, optional
         Return stellar masses instead of system masses
@@ -358,13 +360,11 @@ def make_star_cluster(mtotal=None,
         cl = sample_mass(mtotal, **kwargs)
 
     if return_stellar:
+        star_cl, mults, ratios = convert_syst_to_stellar(cl,
+                                                         preserve_structure=preserve_structure)
         if return_conversion:
-            star_cl, mults, ratios = convert_syst_to_stellar(cl,
-                                                             preserve_structure=preserve_structure)
             return star_cl, mults, ratios
         else:
-            star_cl = convert_syst_to_stellar(cl,
-                                              preserve_structure=preserve_structure)
             return star_cl
     else:
         return cl
@@ -373,8 +373,8 @@ def make_igimf(mtotal=None,
                nclusters=None,
                mclust_min=1e2,
                mclust_max=1e6,
-               m_taper=8.5e3,
-               imf='kroupa',
+               m0=8.5e3,
+               star_massfunc='kroupa',
                sampling='random',
                stop_criterion='nearest',
                mstar_min=None,
@@ -397,12 +397,12 @@ def make_igimf(mtotal=None,
         Minimum cluster mass (default = 1e2)
     mclust_max: float
         Maximum cluster mass (default = 1e6)
-    m_taper: float
+    m0: float
         Characteristic mass of the Schechter function, i.e.
         for the exponential taper (default = 8.5e3)
-    imf: str or MassFunction
-        A mass function to use for the IMF. See ``sample_mass``
-        for details (default = ``'kroupa'``)
+    star_massfunc: str or MassFunction
+        A mass function to use for the stellar IMF. See 
+        ``sample_mass`` for details (default = ``'kroupa'``)
     sampling: str
         Which sampling method to use. See ``sample_mass`` for
         details (default = ``'random'``)
@@ -421,22 +421,24 @@ def make_igimf(mtotal=None,
     """
     assert ~np.logical_and(mtotal is None, nclusters is None), 'please provide either a total mass in clusters or a number of clusters'
     
-    cluster_mf = imf.Schechter(mmin=mmin, mmax=mmax,
+    cluster_mf = imf.Schechter(mmin=mclust_min, mmax=mclust_max,
                                alpha=2, m0=m0)
     if mtotal is None:
         clusters = sample_number(nclusters, massfunc=cluster_mf,
                                  silent=True)
         print(f'Total mass in clusters is {np.round(sum(clusters), 1)}.') 
     else:
-        clusters = sample_mass_function(mtotal, massfunc=cluster_mf,
-                                        silent=True)
+        clusters = sample_mass(mtotal, massfunc=cluster_mf,
+                               silent=True)
         print(f'Sampled {len(clusters)} clusters.')
         
     igimf = np.array([])
-    for cl in clusters:
-        cl_imf = make_star_cluster(mtotal=cl, massfunc=imf, sampling=sampling,
+    for cl in tqdm(clusters):
+        cl_imf = make_star_cluster(mtotal=cl, massfunc=star_massfunc,
+                                   sampling=sampling,
                                    stop_criterion=stop_criterion,
-                                   mmin=mstar_min, mmax=mstar_max)
+                                   mmin=mstar_min, mmax=mstar_max,
+                                   silent=True)
         igimf = np.append(igimf, cl_imf)
         
     return igimf
