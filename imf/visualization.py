@@ -1,6 +1,7 @@
 import numpy as np
 
-from .imf import make_cluster, get_massfunc
+from .imf import get_massfunc
+from .sampling import sample_mass
 from .lum import lum_of_star
 
 
@@ -107,9 +108,9 @@ def plotinfo(masses=None,
     massfunc = get_massfunc(massfunc, mmin=mmin, mmax=mmax)
 
     if masses is None:
-        cluster = make_cluster(mtot,
-                               massfunc=massfunc,
-                               **kwargs)
+        cluster = sample_mass(mtot,
+                              massfunc=massfunc,
+                              **kwargs)
     else:
         cluster = np.copy(masses)
 

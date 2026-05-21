@@ -4,7 +4,7 @@ under the curve with an appropriate number of stars colored by their
 "true"(ish) color and sized by their mass.
 """
 import imf
-from imf import kroupa, make_cluster
+from imf import kroupa
 from imf.visualization import plotinfo
 from astropy.table import Table
 import numpy as np

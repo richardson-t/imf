@@ -1,15 +1,14 @@
-from imf import make_cluster
+import imf
+from imf.sampling import sample_mass
 import pylab as pl
 
-import imf
-
-maxmass = [imf.make_cluster(500, verbose=False, silent=True).max() for ii in
+maxmass = [sample_mass(500, verbose=False, silent=True).max() for ii in
            range(10000)]
-maxmass_sorted = [imf.make_cluster(500, stop_criterion='sorted', verbose=False,
+maxmass_sorted = [sample_mass(500, stop_criterion='sorted', verbose=False,
                                    silent=True).max() for ii in range(10000)]
-maxmass_before = [imf.make_cluster(500, stop_criterion='before', verbose=False,
+maxmass_before = [sample_mass(500, stop_criterion='before', verbose=False,
                                    silent=True).max() for ii in range(10000)]
-maxmass_after = [imf.make_cluster(500, stop_criterion='after', verbose=False,
+maxmass_after = [sample_mass(500, stop_criterion='after', verbose=False,
                                    silent=True).max() for ii in range(10000)]
 
 pl.clf()
