@@ -6,8 +6,6 @@ from scipy.optimize import root_scalar
 import imf
 from imf.imf import get_massfunc
 
-from tqdm import tqdm
-
 expectedmass_cache = {}
 
 def sample_mass(mtotal,
@@ -433,7 +431,7 @@ def make_igimf(mtotal=None,
         print(f'Sampled {len(clusters)} clusters.')
         
     igimf = np.array([])
-    for cl in tqdm(clusters):
+    for cl in clusters:
         cl_imf = make_star_cluster(mtotal=cl, massfunc=star_massfunc,
                                    sampling=sampling,
                                    stop_criterion=stop_criterion,
