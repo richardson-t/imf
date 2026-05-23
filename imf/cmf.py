@@ -18,7 +18,7 @@ class PN_CMF(MassFunction):
     """
     Core mass function derived from a population generated according to
     `Padoan/Nordlund (2011) <https://doi.org/10.1088/2041-8205/741/1/L22>`__.
-    The base CMF consists of cores which have not or will not collapse
+    The base CMF consists of cores that have not collapsed or will not collapse
     and are visible at the crossing time of the parent cloud. Uses
     interpolation for evaluation and sampling.
 
@@ -43,7 +43,7 @@ class PN_CMF(MassFunction):
         Defaults to a ``Salpeter`` instance with the provided mass range.
     sampling: str
         Method to use for sampling the provided mass function.
-        Accepts ``"random"`` or ``"optimal"``. If ``None``, 
+        Accepts ``"random"`` or ``"optimal"``. If ``None``,
         defaults to random sampling.
     stop_criterion: str
         Stop criterion for random sampling; accepts the same arguments
@@ -62,7 +62,7 @@ class PN_CMF(MassFunction):
     bins: int or str
         Number of histogram bins (in log space) or type of estimator to
         use for bin width; accepts the same arguments as `NumPy histograms
-        <https://numpy.org/doc/stable/reference/generated/numpy.histogram.html>`__ 
+        <https://numpy.org/doc/stable/reference/generated/numpy.histogram.html>`__
         (default = ``'auto'``)
     """
 
@@ -96,7 +96,7 @@ class PN_CMF(MassFunction):
         s = np.sqrt(np.log(1 + sigma_rho**2))  # lognormal shape
 
         n0 = (rho0 / constants.m_p / mu).to(u.cm**-3).value
-        self._massfunc = imf.Salpeter(mmin=mmin,mmax=mmax) if massfunc is None else massfunc
+        self._massfunc = imf.Salpeter(mmin=mmin, mmax=mmax) if massfunc is None else massfunc
         self._maccr = imf.make_cluster(mcluster=(m0*eff).to(u.M_sun).value,
                                        massfunc=self.massfunc,
                                        sampling=sampling,
@@ -141,16 +141,16 @@ class PN_CMF(MassFunction):
 
     def get_masses(self, tnow=1, cores='prestellar', visible_only=True):
         """
-        Returns the masses of cores meeting the specifications (in 
+        Returns the masses of cores meeting the specifications (in
         :math:`M_\odot`). ``'tnow'``, ``'visible_only'``, and ``'cores'``
-        accept the same arguments as the setter methods for time, 
+        accept the same arguments as the setter methods for time,
         visibility, and core type respectively.
         """
         return self.distr._core_masses(tnow, visible_only, cores)
 
     def set_time(self, x):
         """
-        Sets the time at which the CMF is sampled. Accepts ints 
+        Sets the time at which the CMF is sampled. Accepts ints
         and floats;  units are in terms of cloud crossing time.
         """
         self.distr._time = x
@@ -270,16 +270,16 @@ class dist_pn(Distribution):
         """
         age = tnow * self.tcross - self.birthdays
         isBorn = age > 0
-        isTransient = self.belowBE #cores which will never collapse
-        isPrestellar = np.logical_and(age < self.tbe + self.tff, ~isTransient) #cores which will collapse but haven't
-        isStellar = np.logical_and(age >= self.tbe + self.tff, ~isTransient) #cores which have collapsed
+        isTransient = self.belowBE  # cores that will never collapse
+        isPrestellar = np.logical_and(age < self.tbe + self.tff, ~isTransient)  # cores that will collapse but haven't
+        isStellar = np.logical_and(age >= self.tbe + self.tff, ~isTransient)  # cores that have collapsed
         isForming = age < self.taccr
-        
+
         mnow = ((age / self.taccr)**3 * self.maccr).to(u.M_sun)
         mnow[mnow > self.maccr] = self.maccr[mnow > self.maccr]  # cap current mass to final sampled mass
 
         cut = np.copy(isBorn)
-        
+
         if cores == 'prestellar':
             cut = np.logical_and(cut, isPrestellar)
         elif cores == 'stellar':
@@ -287,7 +287,7 @@ class dist_pn(Distribution):
         elif cores == 'transient':
             cut = np.logical_and(cut, isTransient)
             if visible:
-                cut = np.logical_and(cut, isForming) # transient cores are modeled as only visible during formation
+                cut = np.logical_and(cut, isForming)  # transient cores are modeled as only visible during formation
         elif cores == 'nonstellar':
             trans_cut = np.logical_and(isTransient, isForming) if visible else isTransient
             cut = np.logical_and(cut, np.logical_or(isPrestellar, trans_cut))
@@ -381,7 +381,7 @@ class HC_CMF(MassFunction):
     Generalized core mass function following the formalism of
     Hennebelle/Chabrier (`2008 <https://doi.org/10.1086/589916>`_,
     `2009 <https://doi.org/10.1088/0004-637X/702/2/1428>`_,
-    `2013 <https://doi.org/10.1088/0004-637X/770/2/150>`_). The 
+    `2013 <https://doi.org/10.1088/0004-637X/770/2/150>`_). The
     base CMF is the time-dependent version from the 2013 paper.
     Uses interpolation for evaluation and sampling.
 
@@ -502,7 +502,7 @@ class HC_CMF(MassFunction):
 
     def set_timedep(self, x):
         """
-        Sets the type of CMF to use. If ``True``, use the time-dependent 
+        Sets the type of CMF to use. If ``True``, use the time-dependent
         CMF of HC13; if ``False``, use the time-independent form of HC08/09.
         """
         self.distr.time_dep = bool(x)
