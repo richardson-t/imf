@@ -360,7 +360,8 @@ def make_star_cluster(mtotal=None,
         used to obtain them. Provides two additional outputs; see
         ``convert_syst_to_stellar`` for details (default = ``False``)
     """
-    assert ~np.logical_and(mtotal is None, nstars is None), 'please provide either a total mass in stars or a number of stars'
+    if mtotal is None and nstars is None:
+        raise ValueError('Provide either a total mass in stars or a number of stars')
 
     if mtotal is None:
         cl = sample_number(nstars, **kwargs)
