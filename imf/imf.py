@@ -95,7 +95,7 @@ class MassFunction(object):
 
     def normalize(self, mmin=None, mmax=None, log=False, **kwargs):
         """
-        Normalizes the integral of the function over the range 
+        Normalizes the integral of the function over the range
         [mmin, mmax]. If ``log`` is ``True``, use ``log_integrate``
         instead of ``integrate``.
         """
@@ -153,7 +153,7 @@ class MassFunction(object):
 
 class Salpeter(MassFunction):
     """
-    The `Salpeter (1955) <https://doi.org/10.1086/145971>`__ mass 
+    The `Salpeter (1955) <https://doi.org/10.1086/145971>`__ mass
     function, i.e. a power-law  with :math:`dn/dm \\propto m^{-\\alpha}`.
     Default mass range is [0.3, 120] :math:`M_\\odot`.
 
@@ -184,7 +184,7 @@ class BrokenPowerLaw(MassFunction):
     A generic broken power law mass function. Powers should
     be positive values for decreasing slopes. Break points are
     specifically transitions between segments; mmin and mmax
-    (i.e. the edges) are set separately. Default mass range is 
+    (i.e. the edges) are set separately. Default mass range is
     [0.03, 120] :math:`M_\\odot`.
 
     Parameters
@@ -241,7 +241,7 @@ class BrokenPowerLaw(MassFunction):
         if numerical:
             return super().m_integrate(mlow, mhigh, **kwargs)
         else:
-            #raise NotImplementedError("Analytic m_integrate not implemented for BrokenPowerLaw; use numerical=True to use the default numerical integration")
+            # raise NotImplementedError("Analytic m_integrate not implemented for BrokenPowerLaw; use numerical=True to use the default numerical integration")
             # marking as not implemented because there's a variable definition error that requires some thinking to fix - this _might_ be fixed, but we need to check
             distr1 = distributions.BrokenPowerLaw(
                 [-x + 1 for x in self.powers],
@@ -254,7 +254,7 @@ class BrokenPowerLaw(MassFunction):
 class Kroupa(BrokenPowerLaw):
     """
     The `Kroupa (2001) <https://doi.org/10.1046/j.1365-8711.2001.04022.x>`__
-    parameterization of the IMF. Default mass range is [0.03, 120] 
+    parameterization of the IMF. Default mass range is [0.03, 120]
     :math:`M_\\odot`.
     """
     default_mmin = 0.03
@@ -294,8 +294,8 @@ class Kroupa(BrokenPowerLaw):
 
 class Kirkpatrick2024(BrokenPowerLaw):
     """
-    The local IMF derived in the census of `Kirkpatrick et al. (2024) 
-    <https://doi.org/10.3847/1538-4365/ad24e2>`__. Default mass range 
+    The local IMF derived in the census of `Kirkpatrick et al. (2024)
+    <https://doi.org/10.3847/1538-4365/ad24e2>`__. Default mass range
     is [0.03, 120] :math:`M_\\odot`.
     """
     default_mmin = 0.03
@@ -313,8 +313,8 @@ class Kirkpatrick2024(BrokenPowerLaw):
 class ChabrierPowerLaw(MassFunction):
     """
     The log-normal + power law IMF from `Chabrier 2003
-    <https://doi.org/10.1086/376392>`__. Default mass range 
-    is [0, :math:`\\infty`] :math:`M_\\odot`. 
+    <https://doi.org/10.1086/376392>`__. Default mass range
+    is [0, :math:`\\infty`] :math:`M_\\odot`.
 
     Parameters
     ----------
@@ -365,10 +365,10 @@ class ChabrierPowerLaw(MassFunction):
 
 class ChabrierLogNormal(MassFunction):
     """
-    A purely log-normal version of the `Chabrier (2003) 
-    <https://doi.org/10.1086/376392>`__ IMF. Accepts the same 
+    A purely log-normal version of the `Chabrier (2003)
+    <https://doi.org/10.1086/376392>`__ IMF. Accepts the same
     log-normal shape parameters as ``ChabrierPowerLaw``.
-    Default mass range is [0, :math:`\\infty`] :math:`M_\\odot`. 
+    Default mass range is [0, :math:`\\infty`] :math:`M_\\odot`.
 
     Parameters
     ----------
@@ -401,8 +401,8 @@ class ChabrierLogNormal(MassFunction):
 
 class Schechter(MassFunction):
     """
-    A `Schechter <https://en.wikipedia.org/wiki/Press%E2%80%93Schechter_formalism>`__-like 
-    mass function; a power law with a high-mass exponential 
+    A `Schechter <https://en.wikipedia.org/wiki/Press%E2%80%93Schechter_formalism>`__-like
+    mass function; a power law with a high-mass exponential
     cutoff. Default mass range is [0.03, 200] :math:`M_\\odot`.
     Uses interpolation for sampling.
 
@@ -440,7 +440,7 @@ class Schechter(MassFunction):
 
 class ModifiedSchechter(Schechter):
     """
-    A `Schechter <https://en.wikipedia.org/wiki/Press%E2%80%93Schechter_formalism>`__-like 
+    A `Schechter <https://en.wikipedia.org/wiki/Press%E2%80%93Schechter_formalism>`__-like
     mass function with an additional low-level exponential cutoff.
     Uses interpolation for evaluation and sampling.
 
@@ -482,9 +482,9 @@ class ModifiedSchechter(Schechter):
 
 class KoenConvolvedPowerLaw(MassFunction):
     """
-    An IMF based on an error-convolved power law as described in 
+    An IMF based on an error-convolved power law as described in
     `Koen/Kondlo (2009) <https://doi.org/10.1111/j.1365-2966.2009.14956.x>`__.
-    This implementation is preferred for those looking to work extensively 
+    This implementation is preferred for those looking to work extensively
     with a single mass function, including using it to create clusters.
     Uses interpolation for evaluation and sampling.
 
@@ -495,14 +495,14 @@ class KoenConvolvedPowerLaw(MassFunction):
     alpha: float
         Power law exponent
     sigma: float
-        Specified spread of error. Assumes normal distribution with 
+        Specified spread of error. Assumes normal distribution with
         mean 0 and variance sigma
     npts: int
         Number of points at which to evaluate the function for
         interpolation (default = 200)
     quad_sub_limit: int
-        Limit of the number of subdivisions allowed for 
-        ``scipy.integrate.quad``, which handles integration 
+        Limit of the number of subdivisions allowed for
+        ``scipy.integrate.quad``, which handles integration
         (default = 50)
     """
     default_mmin = 0
@@ -567,9 +567,9 @@ class KoenConvolvedPowerLaw(MassFunction):
 
 class SpotKoenConvolvedPowerLaw(MassFunction):
     """
-    The same formalism as ``KoenConvolvedPowerLaw``, but evaluation is 
+    The same formalism as ``KoenConvolvedPowerLaw``, but evaluation is
     done on the spot instead of interpolating between precomputed
-    values. This implementation is good for those looking for 
+    values. This implementation is good for those looking for
     improved accuracy or wanting to work with multiple mass functions at
     a time (e.g. for comparison).
     """
@@ -646,7 +646,7 @@ class SpotKoenConvolvedPowerLaw(MassFunction):
 
 class PadoanTF(MassFunction):
     """
-    An IMF implementing the form derived in `Padoan & 
+    An IMF implementing the form derived in `Padoan &
     Nordlund (2002) <https://doi.org/10.1086/341790>`_
     emerging from turbulent fragmentation theory. Default
     mass range is [0.01, 200] :math:`M_\\odot`. Uses
@@ -655,17 +655,17 @@ class PadoanTF(MassFunction):
     Parameters
     ----------
     b: float
-        Spectral index of the turbulence power spectrum 
+        Spectral index of the turbulence power spectrum
         (default = 1.8)
     T0: float
         Average gas temperature in K (default = 10)
     n0: float
         Average gas number density in 1 / cm3 (default = 5e2)
     sigma: float
-        Standard deviation of the log of gas density (default = 
+        Standard deviation of the log of gas density (default =
         ``None``)
     mach: float
-        Mach number of the turbulent flow. Used to calculate sigma 
+        Mach number of the turbulent flow. Used to calculate sigma
         if sigma is ``None`` (default = 10)
     npts: int
         Number of points at which to evaluate the function for
@@ -844,14 +844,14 @@ def inverse_imf(p,
                 massfunc='kroupa',
                 **kwargs):
     """
-    Inverse mass function.  Given a likelihood value in the 
-    range [0, 1), return the appropriate mass.  This calls the 
+    Inverse mass function.  Given a likelihood value in the
+    range [0, 1), return the appropriate mass.  This calls the
     mass function's PPF under the hood.
 
     Parameters
     ----------
     p: np.array
-        An array of floats in the range [0, 1).  These should be 
+        An array of floats in the range [0, 1).  These should be
         uniformly random numbers.
     mmin: float
         Minimum stellar mass for the mass function if none
@@ -860,7 +860,7 @@ def inverse_imf(p,
         Maximum stellar mass for the mass function if none
         exists already (default = ``None``)
     massfunc: string or MassFunction
-        ``massfunc`` can be ``'salpeter'``, ``'kroupa'``, 
+        ``massfunc`` can be ``'salpeter'``, ``'kroupa'``,
         ``'chabrier'``, or an existing function
     """
 
