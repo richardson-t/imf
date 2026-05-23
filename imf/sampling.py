@@ -360,7 +360,7 @@ def make_star_cluster(mtotal=None,
         used to obtain them. Provides two additional outputs; see
         ``convert_syst_to_stellar`` for details (default = ``False``)
     """
-    if mtotal is None and nstars is None:
+    if mtotal is None and nstars is None or (mtotal is not None and nstars is not None):
         raise ValueError('Provide either a total mass in stars or a number of stars')
 
     if mtotal is None:
@@ -392,7 +392,7 @@ def make_igimf(mtotal=None,
     """
     Returns an integrated galaxy-wide IMF, i.e. the system mass function
     for all systems across a population of star clusters within a galaxy.
-    Samples star systems from clusters which are sampled in turn from a
+    Samples star systems from clusters that are sampled in turn from a
     Schechter mass function.
 
     Parameters
@@ -400,7 +400,7 @@ def make_igimf(mtotal=None,
     mtotal: float
         Total mass budget. Either ``mtotal`` or ``nclusters``
         must be provided (default = None)
-    ntotal: int
+    nclusters: int
         Total number of star systems to draw. Either ``nclusters``
         or ``mtotal`` must be provided (default = None)
     mclust_min: float
@@ -429,7 +429,8 @@ def make_igimf(mtotal=None,
         If the provided IMF has no defined maximum, use this
         (default = ``None``)
     """
-    assert ~np.logical_and(mtotal is None, nclusters is None), 'please provide either a total mass in clusters or a number of clusters'
+    if mtotal is None and nclusters is None or (mtotal is not None and nclusters is not None):
+        raise ValueError('Provide either a total mass in clusters or a number of clusters')
 
     cluster_mf = imf.Schechter(mmin=mclust_min, mmax=mclust_max,
                                alpha=2, m0=m0)
