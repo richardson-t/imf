@@ -481,10 +481,12 @@ def _max_star(m, M_res, massfunc):
     return M_res - _M_cluster(m, massfunc)
 
 
-def _max_star_prime(m, M_res, massfunc):
+def _max_star_prime(m, _, massfunc):
     """
     Returns the derivative of _max_star at mass m. Used for Newton's method in
-    the case of an infinite upper bound on the provided mass function.
+    the case of an infinite upper bound on the provided mass function. Includes
+    a dummy variable due to its use in _opt_sample, where it is paired with
+    _max_star.
     """
     term1 = _prefactor(m, massfunc)**2 * massfunc(m) * massfunc.m_integrate(massfunc.mmin, m)[0]
     term2 = m * massfunc(m) * _prefactor(m, massfunc)
