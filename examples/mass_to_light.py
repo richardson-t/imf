@@ -6,6 +6,7 @@ import matplotlib
 from astropy.utils.console import ProgressBar
 
 from imf import imf
+from imf.sampling import sample_mass
 from imf.lum import lum_of_cluster
 
 pl.rc('font', size=16)
@@ -23,7 +24,7 @@ for stop_crit in ('nearest', 'before', 'after', 'sorted'):
         clusters, luminosities, masses, mean_luminosities, mean_masses, max_masses, number = {}, {}, {}, {}, {}, {}, {}
         for clmass in ProgressBar(np.concatenate([10**(np.random.rand(int(1e3))*1 + 4), 10**(np.random.rand(int(1e4))*2.5+1.5)])):
             key = str(clmass)  # for jsonification
-            clusters[key] = imf.make_cluster(clmass, 'kroupa', mmax=150, silent=True, stop_criterion=stop_crit)
+            clusters[key] = sample_mass(clmass, 'kroupa', mmax=150, silent=True, stop_criterion=stop_crit)
             # cluster luminosities
             luminosities[key] = lum_of_cluster(clusters[key])
             masses[key] = clmass
@@ -71,8 +72,8 @@ for stop_crit in ('nearest', 'before', 'after', 'sorted'):
     slopes = np.linspace(1.7, 2.9, 20)
     for slope in ProgressBar(slopes):
         Kroupa = imf.Kroupa(p3=slope)
-        cluster = imf.make_cluster(1e5, Kroupa, mmax=120, silent=True,
-                                   stop_criterion=stop_crit)
+        cluster = sample_mass(1e5, Kroupa, mmax=120, silent=True,
+                              stop_criterion=stop_crit)
         lum = imf.lum_of_cluster(cluster)
         m_to_l = 1e5/10**lum
         m_to_ls.append(m_to_l)

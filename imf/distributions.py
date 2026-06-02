@@ -321,7 +321,8 @@ class CutoffPowerLaw(PowerLaw):
     def ppf(self, x):
         points = np.geomspace(self.m1, self.m2, self.npts)
         cdf = self.cdf(points)
-        interp = PchipInterpolator(cdf/max(cdf), points)
+        cdf, unq = np.unique(cdf,return_index=True)
+        interp = PchipInterpolator(cdf/max(cdf), points[unq])
         return interp(x, extrapolate=False)
 
 
@@ -364,7 +365,8 @@ class ModifiedCutoffPowerLaw(PowerLaw):
     def ppf(self, x):
         points = np.geomspace(self.m1, self.m2, self.npts)
         cdf = self.cdf(points)
-        interp = PchipInterpolator(cdf/max(cdf), points)
+        cdf, unq = np.unique(cdf, return_index=True)
+        interp = PchipInterpolator(cdf/max(cdf), points[unq])
         return interp(x, extrapolate=False)
 
 

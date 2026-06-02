@@ -1,4 +1,4 @@
-from imf import make_cluster
+from imf.sampling import sample_mass
 from imf.lum import lum_of_cluster
 from imf.visualization import color_of_cluster
 import numpy as np
@@ -20,7 +20,7 @@ if __name__ == "__main__":
     nclusters = 5000
 
     cluster_masses = np.array([np.interp(p, cdf, cluster_mass_xax) for p in np.random.rand(nclusters)])
-    clusters = [make_cluster(m, mmax=m) for m in cluster_masses]
+    clusters = [sample_mass(m, mmax=m) for m in cluster_masses]
 
     luminosities = np.array([lum_of_cluster(c) for c in clusters])
     # no contrast

@@ -4,7 +4,6 @@ import types
 import scipy.integrate
 import scipy.integrate as integrate
 from scipy.integrate import quad
-from scipy.optimize import root_scalar
 from scipy.stats import norm
 from astropy import units as u
 
@@ -96,7 +95,7 @@ class MassFunction(object):
 
     def normalize(self, mmin=None, mmax=None, log=False, **kwargs):
         """
-        Normalizes the integral of the function over the range 
+        Normalizes the integral of the function over the range
         [mmin, mmax]. If ``log`` is ``True``, use ``log_integrate``
         instead of ``integrate``.
         """
@@ -154,7 +153,7 @@ class MassFunction(object):
 
 class Salpeter(MassFunction):
     """
-    The `Salpeter (1955) <https://doi.org/10.1086/145971>`__ mass 
+    The `Salpeter (1955) <https://doi.org/10.1086/145971>`__ mass
     function, i.e. a power-law  with :math:`dn/dm \\propto m^{-\\alpha}`.
     Default mass range is [0.3, 120] :math:`M_\\odot`.
 
@@ -185,7 +184,7 @@ class BrokenPowerLaw(MassFunction):
     A generic broken power law mass function. Powers should
     be positive values for decreasing slopes. Break points are
     specifically transitions between segments; mmin and mmax
-    (i.e. the edges) are set separately. Default mass range is 
+    (i.e. the edges) are set separately. Default mass range is
     [0.03, 120] :math:`M_\\odot`.
 
     Parameters
@@ -242,7 +241,7 @@ class BrokenPowerLaw(MassFunction):
         if numerical:
             return super().m_integrate(mlow, mhigh, **kwargs)
         else:
-            raise NotImplementedError("Analytic m_integrate not implemented for BrokenPowerLaw; use numerical=True to use the default numerical integration")
+            # raise NotImplementedError("Analytic m_integrate not implemented for BrokenPowerLaw; use numerical=True to use the default numerical integration")
             # marking as not implemented because there's a variable definition error that requires some thinking to fix - this _might_ be fixed, but we need to check
             distr1 = distributions.BrokenPowerLaw(
                 [-x + 1 for x in self.powers],
@@ -255,7 +254,7 @@ class BrokenPowerLaw(MassFunction):
 class Kroupa(BrokenPowerLaw):
     """
     The `Kroupa (2001) <https://doi.org/10.1046/j.1365-8711.2001.04022.x>`__
-    parameterization of the IMF. Default mass range is [0.03, 120] 
+    parameterization of the IMF. Default mass range is [0.03, 120]
     :math:`M_\\odot`.
     """
     default_mmin = 0.03
@@ -295,8 +294,8 @@ class Kroupa(BrokenPowerLaw):
 
 class Kirkpatrick2024(BrokenPowerLaw):
     """
-    The local IMF derived in the census of `Kirkpatrick et al. (2024) 
-    <https://doi.org/10.3847/1538-4365/ad24e2>`__. Default mass range 
+    The local IMF derived in the census of `Kirkpatrick et al. (2024)
+    <https://doi.org/10.3847/1538-4365/ad24e2>`__. Default mass range
     is [0.03, 120] :math:`M_\\odot`.
     """
     default_mmin = 0.03
@@ -314,8 +313,8 @@ class Kirkpatrick2024(BrokenPowerLaw):
 class ChabrierPowerLaw(MassFunction):
     """
     The log-normal + power law IMF from `Chabrier 2003
-    <https://doi.org/10.1086/376392>`__. Default mass range 
-    is [0, :math:`\\infty`] :math:`M_\\odot`. 
+    <https://doi.org/10.1086/376392>`__. Default mass range
+    is [0, :math:`\\infty`] :math:`M_\\odot`.
 
     Parameters
     ----------
@@ -366,10 +365,10 @@ class ChabrierPowerLaw(MassFunction):
 
 class ChabrierLogNormal(MassFunction):
     """
-    A purely log-normal version of the `Chabrier (2003) 
-    <https://doi.org/10.1086/376392>`__ IMF. Accepts the same 
+    A purely log-normal version of the `Chabrier (2003)
+    <https://doi.org/10.1086/376392>`__ IMF. Accepts the same
     log-normal shape parameters as ``ChabrierPowerLaw``.
-    Default mass range is [0, :math:`\\infty`] :math:`M_\\odot`. 
+    Default mass range is [0, :math:`\\infty`] :math:`M_\\odot`.
 
     Parameters
     ----------
@@ -402,9 +401,10 @@ class ChabrierLogNormal(MassFunction):
 
 class Schechter(MassFunction):
     """
-    A `Schechter <https://en.wikipedia.org/wiki/Press%E2%80%93Schechter_formalism>`__-like 
-    mass function; a power law with a high-mass exponential 
+    A `Schechter <https://en.wikipedia.org/wiki/Press%E2%80%93Schechter_formalism>`__-like
+    mass function; a power law with a high-mass exponential
     cutoff. Default mass range is [0.03, 200] :math:`M_\\odot`.
+    Uses interpolation for sampling.
 
     Note that the Schechter mass function is not typically used for stellar mass functions;
     it is more commonly used for galaxy mass functions or cluster mass functions.  Nevertheless,
@@ -445,8 +445,9 @@ class Schechter(MassFunction):
 
 class ModifiedSchechter(Schechter):
     """
-    A `Schechter <https://en.wikipedia.org/wiki/Press%E2%80%93Schechter_formalism>`__-like 
+    A `Schechter <https://en.wikipedia.org/wiki/Press%E2%80%93Schechter_formalism>`__-like
     mass function with an additional low-level exponential cutoff.
+    Uses interpolation for evaluation and sampling.
 
     Parameters
     ----------
@@ -486,10 +487,11 @@ class ModifiedSchechter(Schechter):
 
 class KoenConvolvedPowerLaw(MassFunction):
     """
-    An IMF based on an error-convolved power law as described in 
+    An IMF based on an error-convolved power law as described in
     `Koen/Kondlo (2009) <https://doi.org/10.1111/j.1365-2966.2009.14956.x>`__.
-    This implementation is preferred for those looking to work extensively 
+    This implementation is preferred for those looking to work extensively
     with a single mass function, including using it to create clusters.
+    Uses interpolation for evaluation and sampling.
 
     Parameters
     ----------
@@ -498,14 +500,14 @@ class KoenConvolvedPowerLaw(MassFunction):
     alpha: float
         Power law exponent
     sigma: float
-        Specified spread of error. Assumes normal distribution with 
+        Specified spread of error. Assumes normal distribution with
         mean 0 and variance sigma
     npts: int
         Number of points at which to evaluate the function for
         interpolation (default = 200)
     quad_sub_limit: int
-        Limit of the number of subdivisions allowed for 
-        ``scipy.integrate.quad``, which handles integration 
+        Limit of the number of subdivisions allowed for
+        ``scipy.integrate.quad``, which handles integration
         (default = 50)
     """
     default_mmin = 0
@@ -570,9 +572,9 @@ class KoenConvolvedPowerLaw(MassFunction):
 
 class SpotKoenConvolvedPowerLaw(MassFunction):
     """
-    The same formalism as ``KoenConvolvedPowerLaw``, but evaluation is 
+    The same formalism as ``KoenConvolvedPowerLaw``, but evaluation is
     done on the spot instead of interpolating between precomputed
-    values. This implementation is good for those looking for 
+    values. This implementation is good for those looking for
     improved accuracy or wanting to work with multiple mass functions at
     a time (e.g. for comparison).
     """
@@ -649,25 +651,26 @@ class SpotKoenConvolvedPowerLaw(MassFunction):
 
 class PadoanTF(MassFunction):
     """
-    An IMF implementing the form derived in `Padoan & 
+    An IMF implementing the form derived in `Padoan &
     Nordlund (2002) <https://doi.org/10.1086/341790>`_
     emerging from turbulent fragmentation theory. Default
-    mass range is [0.01, 200] :math:`M_\\odot`.
+    mass range is [0.01, 200] :math:`M_\\odot`. Uses
+    interpolation for evaluation and sampling.
 
     Parameters
     ----------
     b: float
-        Spectral index of the turbulence power spectrum 
+        Spectral index of the turbulence power spectrum
         (default = 1.8)
     T0: float
         Average gas temperature in K (default = 10)
     n0: float
         Average gas number density in 1 / cm3 (default = 5e2)
     sigma: float
-        Standard deviation of the log of gas density (default = 
+        Standard deviation of the log of gas density (default =
         ``None``)
     mach: float
-        Mach number of the turbulent flow. Used to calculate sigma 
+        Mach number of the turbulent flow. Used to calculate sigma
         if sigma is ``None`` (default = 10)
     npts: int
         Number of points at which to evaluate the function for
@@ -789,7 +792,6 @@ massfunctions = {'kroupa': Kroupa, 'salpeter': Salpeter,
                  'chabrierlognormal': ChabrierLogNormal
                  }
 reverse_mf_dict = {v: k for k, v in massfunctions.items()}
-expectedmass_cache = {}
 
 
 def get_massfunc(massfunc, mmin=None, mmax=None, **kwargs):
@@ -847,14 +849,14 @@ def inverse_imf(p,
                 massfunc='kroupa',
                 **kwargs):
     """
-    Inverse mass function.  Given a likelihood value in the 
-    range [0, 1), return the appropriate mass.  This calls the 
+    Inverse mass function.  Given a likelihood value in the
+    range [0, 1), return the appropriate mass.  This calls the
     mass function's PPF under the hood.
 
     Parameters
     ----------
     p: np.array
-        An array of floats in the range [0, 1).  These should be 
+        An array of floats in the range [0, 1).  These should be
         uniformly random numbers.
     mmin: float
         Minimum stellar mass for the mass function if none
@@ -863,7 +865,7 @@ def inverse_imf(p,
         Maximum stellar mass for the mass function if none
         exists already (default = ``None``)
     massfunc: string or MassFunction
-        ``massfunc`` can be ``'salpeter'``, ``'kroupa'``, 
+        ``massfunc`` can be ``'salpeter'``, ``'kroupa'``,
         ``'chabrier'``, or an existing function
     """
 
@@ -874,221 +876,3 @@ def inverse_imf(p,
         return mfc.distr.ppf(p)
     else:
         raise NotImplementedError
-
-
-#### This section contains the functions required to optimally sample a cluster ####
-
-def _prefactor(max_star, massfunc):
-    """
-    Returns the multiplier required for an IMF to have at most one star above m_max.
-    """
-    return 1 / massfunc.integrate(max_star, massfunc.mmax)[0]
-
-
-def _M_cluster(m, massfunc):
-    """
-    Returns the mass of a cluster distributed according to some IMF where the 
-    largest star has mass m.
-    """
-    k = _prefactor(m, massfunc)
-    return k * massfunc.m_integrate(massfunc.mmin, m)[0] + m
-
-
-def _max_star(m, M_res, massfunc):
-    """
-    Returns the most massive star capable of forming in a cluster of mass M_res
-    according to the m_max/M_cluster relation. Formatted for use with root finding.
-    """
-    return M_res - _M_cluster(m, massfunc)
-
-
-def _max_star_prime(m, M_res, massfunc):
-    """
-    Returns the derivative of _max_star at mass m. Used for Newton's method in
-    the case of an infinite upper bound on the provided mass function.
-    """
-    term1 = _prefactor(m, massfunc)**2 * massfunc(m) * massfunc.m_integrate(massfunc.mmin, m)[0]
-    term2 = m * massfunc(m) * _prefactor(m, massfunc)
-    return -term1 - term2 - 1
-
-
-def _opt_sample(M_res, massfunc, tolerance):
-    """
-    Returns a numpy array containing stellar masses that optimally sample 
-    from a provided MassFunction to make a cluster with mass M_res.
-    """
-    # retrieve mass bounds from provided massfunc
-    mmin = massfunc.mmin
-    mmax = massfunc.mmax
-    finMax = np.isfinite(mmax)
-
-    # finding all the component stars requires a cutoff--ensure there is one
-    if not np.logical_or(np.isfinite(np.log(mmin)), np.isfinite(np.log(tolerance))):
-        raise ValueError('Optimal sampling requires either mmin or tolerance to be finite and greater than zero.')
-
-    if finMax:
-        # bracket from min to ALMOST max (max gives an undefined prefactor)
-        sol = root_scalar(_max_star, args=(M_res, massfunc), bracket=[mmin, 0.9999*mmax])
-    else:
-        # use Newton's method
-        sol = root_scalar(_max_star, args=(M_res, massfunc), x0=10*mmin, fprime=_max_star_prime)
-    k = _prefactor(sol.root, massfunc)
-    M_tot = sol.root
-    star_masses = [sol.root]
-    m_i = sol.root
-
-    while np.abs(M_res-M_tot) > np.maximum(mmin, tolerance):
-        try:
-            m_i_plus = root_scalar(lambda x: k * massfunc.integrate(x, m_i)[0]-1,
-                                   bracket=[mmin, m_i]).root
-        except(ValueError):
-            print(f'Reached provided lower mass bound; stopping')
-            break
-        m = k * massfunc.m_integrate(m_i_plus, m_i)[0]
-        star_masses.append(m)
-        M_tot += m
-        m_i = m_i_plus
-
-    return np.array(star_masses), M_tot
-
-##############################################################################
-
-
-def make_cluster(mcluster,
-                 massfunc='kroupa',
-                 tolerance=0.0,
-                 sampling='random',
-                 stop_criterion='nearest',
-                 mmin=None,
-                 mmax=None,
-                 verbose=False,
-                 silent=False,
-                 **kwargs):
-    """
-    Sample from an IMF to make a cluster.  Returns an array with the 
-    masses of all stars in the cluster.
-
-    Parameters
-    ----------
-    mcluster : float
-        The target cluster mass, in solar masses.
-    massfunc : str or MassFunction
-        A mass function to use. Can be an existing ``MassFunction`` instance
-        or ``'salpeter'``, ``'kroupa'``, or ``'chabrier'`` for default
-        common forms (default = ``'kroupa'``)
-    tolerance : float
-        How close the sum of random samples must be to the requested 
-        cluster mass; sampling stops once total sampled mass + ``tolerance``
-        > ``mcluster``. It can be zero, but this does not guarantee that
-        the final cluster mass will be exactly ``mcluster`` (default = 0)
-    sampling: str
-        Which sampling method to use. Can be ``'random'`` or ``'optimal'``
-        (default = ``'random'``)
-    stop_criterion : str
-        The criterion to stop random sampling when the total cluster mass 
-        is reached. Can be ``'nearest'``, ``'before'``, ``'after'``, or
-        ``'sorted'``. Does not factor into optimal sampling (default = 
-        ``'nearest'``)
-
-    Other Parameters
-    ----------------
-    mmin: float
-        If the provided mass function has no defined minimum, use this
-        (default = ``None``)
-    mmax: float
-        If the provided mass function has no defined maximum, use this
-        (default = ``None``)
-    verbose: bool
-        Whether to provide running commentary on the sampling (default = 
-        ``False``)
-    silent: bool
-        Whether to suppress the final sampled cluster mass (default = 
-        ``False``)
-    """
-    # use most common mass to guess needed number of samples
-    # nsamp = mcluster / mostcommonmass[get_massfunc_name(massfunc)]
-    # masses = inverse_imf(np.random.random(int(nsamp)), massfunc=massfunc, **kwargs)
-
-    # mtot = masses.sum()
-    # if verbose:
-    #    print(("%i samples yielded a cluster mass of %g (%g requested)" %
-    #          (nsamp, mtot, mcluster)))
-
-    # catch wrong keywords early
-    ok_samplings = ['random', 'optimal']
-    ok_criteria = ['nearest', 'before', 'after', 'sorted']
-    if not sampling in ok_samplings:
-        raise ValueError("Sampling should be either 'random' or 'optimal' (see documentation)")
-    if (sampling == 'random') and not stop_criterion in ok_criteria:
-        raise ValueError("Stop criterion for random sampling should be 'nearest', 'before', 'after', or 'sorted' (see documentation)")
-
-    if sampling == 'optimal':
-        mfc = get_massfunc(massfunc, mmin=mmin, mmax=mmax, **kwargs)
-        masses, mtot = _opt_sample(mcluster, mfc, tolerance=tolerance)
-        if verbose:
-            print(f'Sampled {len(masses)} new stars.')
-        if not silent:
-            print(f'Total cluster mass is {np.round(mtot, 3)} (limit was {int(mcluster)})')
-
-    else:
-        mcluster = u.Quantity(mcluster, u.M_sun).value
-
-        mfc = get_massfunc(massfunc, mmin=mmin, mmax=mmax, **kwargs)
-
-        if (massfunc, mfc.mmin, mfc.mmax) in expectedmass_cache:
-            expected_mass = expectedmass_cache[(massfunc, mfc.mmin, mfc.mmax)]
-            assert expected_mass > 0
-        else:
-            expected_mass = mfc.m_integrate(mfc.mmin, mfc.mmax)[0]
-            assert expected_mass > 0
-            expectedmass_cache[(massfunc, mfc.mmin, mfc.mmax)] = expected_mass
-
-        if verbose:
-            print("Expected mass is {0:0.3f}".format(expected_mass))
-
-        mtot = 0
-        masses = []
-
-        while mtot < mcluster + tolerance:
-            # at least 1 sample, but potentially many more
-            nsamp = int(np.ceil((mcluster + tolerance - mtot) / expected_mass))
-            assert nsamp > 0
-            newmasses = mfc.distr.rvs(nsamp)
-            masses = np.concatenate([masses, newmasses])
-            mtot = masses.sum()
-            if verbose:
-                print("Sampled %i new stars.  Total is now %g" %
-                      (int(nsamp), mtot))
-
-            if mtot >= mcluster + tolerance:  # don't force exact equality; that would yield infinite loop
-                mcum = masses.cumsum()
-                if stop_criterion == 'sorted':
-                    masses = np.sort(masses)
-                    if np.abs(masses[:-1].sum() - mcluster) < np.abs(masses.sum() -
-                                                                     mcluster):
-                        # if the most massive star makes the cluster a worse fit, reject it
-                        # (this follows Krumholz+ 2015 appendix A1)
-                        last_ind = len(masses) - 1
-                    else:
-                        last_ind = len(masses)
-                else:
-                    if stop_criterion == 'nearest':
-                        # find the closest one, and use +1 to include it
-                        last_ind = np.argmin(np.abs(mcum - mcluster)) + 1
-                    elif stop_criterion == 'before':
-                        last_ind = np.argmax(mcum > mcluster)
-                    elif stop_criterion == 'after':
-                        last_ind = np.argmax(mcum > mcluster) + 1
-                masses = masses[:last_ind]
-                mtot = masses.sum()
-                if verbose:
-                    print(
-                        "Selected the first %i out of %i masses to get %g total" %
-                        (last_ind, len(mcum), mtot))
-                # force the break, because some stopping criteria can push mtot < mcluster
-                break
-
-        if not silent:
-            print("Total cluster mass is %g (limit was %g)" % (mtot, mcluster))
-
-    return masses
