@@ -241,8 +241,6 @@ class BrokenPowerLaw(MassFunction):
         if numerical:
             return super().m_integrate(mlow, mhigh, **kwargs)
         else:
-            # raise NotImplementedError("Analytic m_integrate not implemented for BrokenPowerLaw; use numerical=True to use the default numerical integration")
-            # marking as not implemented because there's a variable definition error that requires some thinking to fix - this _might_ be fixed, but we need to check
             distr1 = distributions.BrokenPowerLaw(
                 [-x + 1 for x in self.powers],
                 [self.mmin, *self.breaks, self.mmax])
