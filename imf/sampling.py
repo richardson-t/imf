@@ -6,6 +6,8 @@ from scipy.optimize import root_scalar
 import imf
 from imf.imf import get_massfunc
 
+from warnings import deprecated
+
 expectedmass_cache = {}
 
 
@@ -323,6 +325,11 @@ def convert_syst_to_stellar(syst_masses,
         return star_masses, mults, ratios
     else:
         return star_masses
+
+
+@deprecated(since="2026.06.09", alternative="imf.make_star_cluster")
+def make_cluster(*args, **kwargs):
+    return make_star_cluster(*args, **kwargs)
 
 
 def make_star_cluster(mtotal=None,
