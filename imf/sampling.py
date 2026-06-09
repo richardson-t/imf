@@ -6,7 +6,7 @@ from scipy.optimize import root_scalar
 import imf
 from imf.imf import get_massfunc
 
-from warnings import deprecated
+from astropy.utils.decorators import deprecated
 
 expectedmass_cache = {}
 

@@ -874,3 +874,11 @@ def inverse_imf(p,
         return mfc.distr.ppf(p)
     else:
         raise NotImplementedError
+
+
+# Sampling utilities live in a dedicated module (imf.sampling) as of the
+# sampling refactor. Import them here, after get_massfunc and the mass
+# functions are defined (so imf.sampling's top-level imports resolve), so they
+# remain accessible as imf.<func> for backwards compatibility.
+from .sampling import (sample_mass, sample_number, convert_syst_to_stellar,
+                       make_cluster, make_star_cluster, make_igimf)
