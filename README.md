@@ -80,7 +80,6 @@ pre-commit install
 The `nbstripout` hook will clear output from `.ipynb` files before commit, and CI enforces the same check.
 
 
-
 ## Credits
 
  * Adam Ginsburg (@keflavich, wrote some of this)
