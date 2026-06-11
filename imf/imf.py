@@ -241,8 +241,6 @@ class BrokenPowerLaw(MassFunction):
         if numerical:
             return super().m_integrate(mlow, mhigh, **kwargs)
         else:
-            # raise NotImplementedError("Analytic m_integrate not implemented for BrokenPowerLaw; use numerical=True to use the default numerical integration")
-            # marking as not implemented because there's a variable definition error that requires some thinking to fix - this _might_ be fixed, but we need to check
             distr1 = distributions.BrokenPowerLaw(
                 [-x + 1 for x in self.powers],
                 [self.mmin, *self.breaks, self.mmax])
@@ -876,3 +874,11 @@ def inverse_imf(p,
         return mfc.distr.ppf(p)
     else:
         raise NotImplementedError
+
+
+# Sampling utilities live in a dedicated module (imf.sampling) as of the
+# sampling refactor. Import them here, after get_massfunc and the mass
+# functions are defined (so imf.sampling's top-level imports resolve), so they
+# remain accessible as imf.<func> for backwards compatibility.
+from .sampling import (sample_mass, sample_number, convert_syst_to_stellar,
+                       make_cluster, make_star_cluster, make_igimf)
